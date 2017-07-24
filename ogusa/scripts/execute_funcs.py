@@ -12,14 +12,17 @@ import ogusa
 from ogusa import calibrate
 ogusa.parameters.DATASET = 'REAL'
 
+from ogusa import SS, TPI
+from ogusa import parameters, demographics, income, utils
+from ogusa import txfunc
 
-def runner(output_base, baseline_dir, test=False, time_path=True, baseline=False,
+
+
+def get_sim_params(output_base, baseline_dir, test=False, time_path=True, baseline=False,
   analytical_mtrs=False, age_specific=False, reform={}, user_params={},
   guid='', run_micro=True, small_open=False, budget_balance=False, baseline_spending=False):
 
     #from ogusa import parameters, wealth, labor, demographics, income
-    from ogusa import parameters, demographics, income, utils
-    from ogusa import txfunc
 
     tick = time.time()
 
@@ -85,7 +88,6 @@ def runner(output_base, baseline_dir, test=False, time_path=True, baseline=False
             G_shifts = np.concatenate((user_params['G_shifts'], np.zeros(run_params['ALPHA_G'].size - user_params['G_shifts'].size)), axis=0)
             run_params['ALPHA_G'] = run_params['ALPHA_G'] + G_shifts
 
-    from ogusa import SS, TPI
 
     calibrate_model = False
     # List of parameter names that will not be changing (unless we decide to
@@ -110,15 +112,28 @@ def runner(output_base, baseline_dir, test=False, time_path=True, baseline=False
         Run SS
     ------------------------------------------------------------------------
     '''
-
+    print ("SJT",run_params["S"],run_params["J"],run_params["T"])
     sim_params = {}
     for key in param_names:
         sim_params[key] = run_params[key]
 
     sim_params['output_dir'] = output_base
     sim_params['run_params'] = run_params
-    income_tax_params, ss_parameters, iterative_params, chi_params, small_open_params = SS.create_steady_state_parameters(**sim_params)
+    sim_params['baseline'] = baseline
+    sim_params['baseline_spending'] = baseline_spending
+    sim_params['input_dir'] = output_base
+    sim_params['baseline_dir'] = baseline_dir
 
+    return sim_params
+
+
+def solve_SS(**sim_params):
+
+    income_tax_params, ss_parameters, iterative_params, chi_params, small_open_params = SS.create_steady_state_parameters(**sim_params)
+    baseline = sim_params['baseline']
+    baseline_spending = sim_params['baseline_spending']
+    baseline_dir = sim_params['baseline_dir']
+    output_base = sim_params['input_dir']
     ss_outputs = SS.run_SS(income_tax_params, ss_parameters, iterative_params, chi_params, small_open_params, baseline, baseline_spending,
                                      baseline_dir=baseline_dir)
 
@@ -136,43 +151,40 @@ def runner(output_base, baseline_dir, test=False, time_path=True, baseline=False
         ss_dir = os.path.join(output_base, "SS/SS_vars.pkl")
         pickle.dump(ss_outputs, open(ss_dir, "wb"))
 
-    if time_path:
-        '''
-        ------------------------------------------------------------------------
-            Run the TPI simulation
-        ------------------------------------------------------------------------
-        '''
-
-        sim_params['baseline'] = baseline
-        sim_params['baseline_spending'] = baseline_spending
-        sim_params['input_dir'] = output_base
-        sim_params['baseline_dir'] = baseline_dir
+    return sim_params, ss_outputs
 
 
-        income_tax_params, tpi_params, iterative_params, small_open_params, initial_values, SS_values, fiscal_params, biz_tax_params = TPI.create_tpi_params(**sim_params)
+def solve_TPI(**sim_params):
+    '''
+    ------------------------------------------------------------------------
+        Run the TPI simulation
+    ------------------------------------------------------------------------
+    '''
 
-        tpi_output, macro_output = TPI.run_TPI(income_tax_params, tpi_params, iterative_params, small_open_params, initial_values,
-                                               SS_values, fiscal_params, biz_tax_params, output_dir=output_base, baseline_spending=baseline_spending)
+    income_tax_params, tpi_params, iterative_params, small_open_params, initial_values, SS_values, fiscal_params, biz_tax_params = TPI.create_tpi_params(**sim_params)
 
-        '''
-        ------------------------------------------------------------------------
-            Pickle TPI results
-        ------------------------------------------------------------------------
-        '''
-        tpi_dir = os.path.join(output_base, "TPI")
-        utils.mkdirs(tpi_dir)
-        tpi_vars = os.path.join(tpi_dir, "TPI_vars.pkl")
-        pickle.dump(tpi_output, open(tpi_vars, "wb"))
+    output_base = sim_params['output_dir']
+    baseline_spending = sim_params['baseline_spending']
+    tpi_output, macro_output = TPI.run_TPI(income_tax_params, tpi_params, iterative_params, small_open_params, initial_values,
+                                           SS_values, fiscal_params, biz_tax_params, output_dir=output_base, baseline_spending=baseline_spending)
 
-        tpi_dir = os.path.join(output_base, "TPI")
-        utils.mkdirs(tpi_dir)
-        tpi_vars = os.path.join(tpi_dir, "TPI_macro_vars.pkl")
-        pickle.dump(macro_output, open(tpi_vars, "wb"))
+    '''
+    ------------------------------------------------------------------------
+        Pickle TPI results
+    ------------------------------------------------------------------------
+    '''
+    tpi_dir = os.path.join(output_base, "TPI")
+    utils.mkdirs(tpi_dir)
+    tpi_vars = os.path.join(tpi_dir, "TPI_vars.pkl")
+    pickle.dump(tpi_output, open(tpi_vars, "wb"))
+
+    tpi_dir = os.path.join(output_base, "TPI")
+    utils.mkdirs(tpi_dir)
+    tpi_vars = os.path.join(tpi_dir, "TPI_macro_vars.pkl")
+    pickle.dump(macro_output, open(tpi_vars, "wb"))
 
 
-        print "Time path iteration complete."
-    print "It took {0} seconds to get that part done.".format(time.time() - tick)
-    if time_path:
-        return sim_params, ss_outputs, tpi_output, macro_output
-    else:
-        return sim_params, ss_outputs
+    print "Time path iteration complete."
+
+    return tpi_output, macro_output
+# print "It took {0} seconds to get that part done.".format(time.time() - tick)
