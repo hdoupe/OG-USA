@@ -17,7 +17,7 @@ def runner(output_base, baseline_dir, test=False, time_path=True,
            baseline=False, analytical_mtrs=False, age_specific=False,
            reform={}, user_params={}, guid='', run_micro=True,
            small_open=False, budget_balance=False,
-           baseline_spending=False):
+           baseline_spending=False, data=None):
 
     from ogusa import parameters, demographics, income, utils
     from ogusa import txfunc
@@ -53,7 +53,8 @@ def runner(output_base, baseline_dir, test=False, time_path=True,
             reform=reform, guid=guid,
             tx_func_est_path=os.path.join(
                 output_base,'TxFuncEst_{}.pkl'.format(guid)
-            )
+            ),
+            data=data
         )
     print 'In runner, baseline is ', baseline
     run_params = ogusa.parameters.get_parameters(

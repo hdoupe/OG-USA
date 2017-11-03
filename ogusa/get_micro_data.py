@@ -29,7 +29,8 @@ import numba
 import pickle
 
 
-def get_calculator(baseline, calculator_start_year, reform=None, data=None, weights=None, records_start_year=None):
+def get_calculator(baseline, calculator_start_year, reform=None, data=None,
+                   weights=None, records_start_year=None, data=None):
     '''
     --------------------------------------------------------------------
     This function creates the tax calculator object for the microsim
