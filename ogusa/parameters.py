@@ -385,11 +385,10 @@ def get_parameters(test=False, baseline=False, guid='', user_modifiable=False, m
             estimate_file = os.path.join(TAX_ESTIMATE_PATH,
                                          policy_pckl)
         else:
-            policy_pckl = "TxFuncEst_baseline{}.pkl".format(guid)
+            policy_pckl = "TxFuncEst_policy{}.pkl".format(guid)
             estimate_file = tx_func_est_path
         print 'using policy tax parameters'
         dict_params = read_tax_func_estimate(estimate_file, policy_pckl)
-
 
     mean_income_data = dict_params['tfunc_avginc'][0]
 
@@ -459,6 +458,7 @@ def get_parameters(test=False, baseline=False, guid='', user_modifiable=False, m
     (omega, g_n_ss, omega_SS, surv_rate, rho, g_n_vector, imm_rates,
         omega_S_preTP) = dem.get_pop_objs(E, S, T, 1, 100, start_year,
         flag_graphs)
+
     # Interpolate chi_n_guesses and create omega_SS_80 if necessary
     if S == 80:
         chi_n_guess = chi_n_guess_80.copy()
