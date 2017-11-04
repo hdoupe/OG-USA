@@ -50,8 +50,10 @@ def get_calculator(baseline, calculator_start_year, reform=None, data=None,
     '''
     # create a calculator
     policy1 = Policy()
-    if data is not None:
-        records1 = Records(data=data, weights=weights)#, start_year=records_start_year)
+    if data == "cps":
+        records1 = Records.cps_constructor()
+    elif data is not None:
+        records1 = Records(data=data, weights=weights, start_year=records_start_year)
     else:
         records1 = Records()
 
