@@ -18,7 +18,7 @@ CPU_COUNT = 4
 REF_IDXS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
-DATA = pd.read_csv(PUF_PATH)
+# DATA = pd.read_csv(PUF_PATH)
 reform0 = {
     2016: {
         '_II_rt1': [.09],
@@ -148,7 +148,7 @@ def run_micro_macro(user_params, reform=None, baseline_dir=BASELINE_DIR,
 
 
 def run_reforms(ref_idxs=REF_IDXS, path_prefix="", cpu_count=CPU_COUNT,
-                data=DATA):
+                data=PUF_PATH):
     # make sure we have a baseline result before other reforms are run
     ok_to_run_baseline = True
     run_micro_macro({},
@@ -189,6 +189,8 @@ if __name__ == "__main__":
     parser.add_argument("--set_reg_data", action="store_true",
                         help=("If used, we are creating regression data and "
                               "results are written to './REG_*'"))
+    parser.add_argument("--use_cps", action="store_true",
+                        help="Flag for using the CPS instead of the PUF")
     parser.add_argument("--cpu_count", default=CPU_COUNT, type=int,
                         help="Number CPUs to use")
     args = parser.parse_args()
@@ -198,7 +200,13 @@ if __name__ == "__main__":
         ref_idxs = [int(idx) for idx in ref_idxs.split(',')]
     path_prefix = "REG_" if args.set_reg_data else ""
     cpu_count = args.cpu_count
+    use_cps = args.use_cps
+    if use_cps:
+        data = "cps"
+    else:
+        data = PUF_PATH
 
     run_reforms(ref_idxs=ref_idxs,
                 path_prefix=path_prefix,
-                cpu_count=cpu_count)
+                cpu_count=cpu_count,
+                data=data)
