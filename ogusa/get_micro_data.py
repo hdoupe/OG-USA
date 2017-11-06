@@ -103,8 +103,6 @@ def get_data(baseline=False, start_year=2016, reform={}, data=None):
     RETURNS: micro_data_dict
     --------------------------------------------------------------------
     '''
-    print('start_year', start_year)
-    print('reform', reform)
     calc1 = get_calculator(baseline=baseline, calculator_start_year=start_year,
                            reform=reform, data=data)
 

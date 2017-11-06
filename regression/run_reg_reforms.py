@@ -111,7 +111,6 @@ def run_micro_macro(user_params, reform=None, baseline_dir=BASELINE_DIR,
         Run baseline
     ------------------------------------------------------------------------
     '''
-    print('path exists', not os.path.exists(baseline_dir), ok_to_run_baseline)
     if not os.path.exists(baseline_dir) and ok_to_run_baseline:
         output_base = baseline_dir
         input_dir = baseline_dir
