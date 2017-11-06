@@ -57,6 +57,8 @@ def get_calculator(baseline, calculator_start_year, reform=None, data=None,
     else:
         records1 = Records()
 
+    # start year is 2009 for puf and 2013 for cps.  This makes sure the
+    # start_year is correct for both cases
     start_year = records1.current_year
 
     if baseline:
