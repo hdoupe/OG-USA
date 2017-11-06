@@ -57,6 +57,8 @@ def get_calculator(baseline, calculator_start_year, reform=None, data=None,
     else:
         records1 = Records()
 
+    start_year = records1.current_year
+
     if baseline:
         #Should not be a reform if baseline is True
         assert not reform
@@ -69,7 +71,7 @@ def get_calculator(baseline, calculator_start_year, reform=None, data=None,
 
     # this increment_year function extrapolates all PUF variables to the next year
     # so this step takes the calculator to the start_year
-    for i in range(calculator_start_year-2013):
+    for i in range(calculator_start_year-start_year):
         calc1.increment_year()
 
     return calc1
