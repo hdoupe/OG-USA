@@ -626,8 +626,7 @@ def replace_outliers(param_arr, sse_big_mat):
                 # 1 and set the param_arr_adj equal to nan
                 big_cnt += 1
                 param_arr_adj[s, t, :] = np.nan
-            if (sse_big_mat[s, t] == False and big_cnt > 0 and
-              s == big_cnt):
+            if sse_big_mat[s, t] == False and big_cnt > 0 and s == big_cnt:
                 # When the current function is not an outlier but the last
                 # one was and this string of outliers is at the beginning
                 # ages, set the outliers equal to this period's tax function
@@ -635,8 +634,7 @@ def replace_outliers(param_arr, sse_big_mat):
                 param_arr_adj[:big_cnt, t, :] = np.tile(reshaped, (big_cnt, 1))
                 big_cnt = 0
 
-            if (sse_big_mat[s, t] == False and big_cnt > 0 and
-                s > big_cnt):
+            if sse_big_mat[s, t] == False and big_cnt > 0 and s > big_cnt:
                 # When the current function is not an outlier but the last
                 # one was and this string of outliers is in the interior of
                 # ages, set the outliers equal to a linear interpolation
