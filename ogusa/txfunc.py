@@ -46,7 +46,9 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 
-from . import get_micro_data
+from rpc.client import Client
+
+# from . import get_micro_data
 from . import utils
 from ogusa.utils import DEFAULT_START_YEAR
 
@@ -1538,11 +1540,17 @@ def tax_func_estimate(BW, S, starting_age, ending_age,
         os.makedirs(output_dir)
 
     # call tax caculator and get microdata
-    micro_data = get_micro_data.get_data(baseline=baseline,
-                                         start_year=beg_yr,
-                                         reform=reform, data=data,
-                                         client=client,
-                                         num_workers=num_workers)
+    with Client(health_port=5566, submit_job_port=5567, get_job_port=5568) as rpc_client:
+        task = rpc_client.submit(endpoint='ogusa_tc_endpoint',
+                                 kwargs=dict(baseline=baseline,
+                                             start_year=beg_yr,
+                                             reform=reform, data=data,
+                                             client=None,
+                                             num_workers=num_workers))
+        result = rpc_client.get(task)
+        print(result)
+        assert result['status'] == 'SUCCESS'
+        micro_data = result['result']
 
     lazy_values = []
     for t in years_list:

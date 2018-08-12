@@ -6,7 +6,7 @@ from dask.distributed import Client
 import time
 import numpy as np
 
-from taxcalc import *
+# from taxcalc import *
 import ogusa
 from ogusa.scripts import postprocess
 from ogusa.scripts.execute import runner
@@ -17,11 +17,6 @@ def run_micro_macro(user_params):
     # Grab a reform JSON file already in Tax-Calculator
     # In this example the 'reform' is a change to 2017 law (the
     # baseline policy is tax law in 2018)
-    rec = Records.cps_constructor()
-    pol = Policy()
-    calc = Calculator(policy=pol, records=rec)
-    ref = calc.read_json_param_objects('2017_law.json', None)
-    reform = ref['policy']
 
     # Define parameters to use for multiprocessing
     client = Client(processes=False)
@@ -84,10 +79,10 @@ def run_micro_macro(user_params):
               'test': False, 'time_path': True, 'baseline': False,
               'constant_rates': False, 'analytical_mtrs': False,
               'age_specific': True, 'user_params': user_params,
-              'guid': '_example', 'reform': reform, 'run_micro': True,
-              'small_open': small_open, 'budget_balance': False,
-              'baseline_spending': False, 'data': 'cps',
-              'client': client, 'num_workers': num_workers}
+              'guid': '_example', 'reform': user_params.get('reform', None),
+              'run_micro': True, 'small_open': small_open,
+              'budget_balance': False, 'baseline_spending': False,
+              'data': 'cps', 'client': client, 'num_workers': num_workers}
 
     start_time = time.time()
     runner(**kwargs)
@@ -104,4 +99,4 @@ def run_micro_macro(user_params):
 
 
 if __name__ == "__main__":
-    run_micro_macro(user_params={})
+    run_micro_macro(user_params={'reform':{2020: {'_STD': [15000, 30000, 15000, 22000, 30000]}}})
