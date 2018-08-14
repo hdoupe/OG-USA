@@ -1540,7 +1540,7 @@ def tax_func_estimate(BW, S, starting_age, ending_age,
         os.makedirs(output_dir)
 
     # call tax caculator and get microdata
-    with Client(health_port=5566, submit_job_port=5567, get_job_port=5568) as rpc_client:
+    with Client(kernel_id='taxcalc_kernel') as rpc_client:
         task = rpc_client.submit(endpoint='ogusa_tc_endpoint',
                                  kwargs=dict(baseline=baseline,
                                              start_year=beg_yr,
