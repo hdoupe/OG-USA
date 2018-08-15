@@ -22,6 +22,8 @@ def run_micro_macro(user_params):
     print('Number of workers = ', num_workers)
     start_time = time.time()
 
+    reform = user_params.get('reform', {})
+
     # Set some model parameters
     # See parameters.py for description of these parameters
     T_shifts = np.zeros(50)
@@ -77,7 +79,7 @@ def run_micro_macro(user_params):
               'test': False, 'time_path': True, 'baseline': False,
               'constant_rates': False, 'analytical_mtrs': False,
               'age_specific': True, 'user_params': user_params,
-              'guid': '_example', 'reform': user_params.get('reform', None),
+              'guid': '_example', 'reform': reform,
               'run_micro': True, 'small_open': small_open,
               'budget_balance': False, 'baseline_spending': False,
               'data': 'cps', 'client': client, 'num_workers': num_workers}

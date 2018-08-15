@@ -1540,17 +1540,16 @@ def tax_func_estimate(BW, S, starting_age, ending_age,
         os.makedirs(output_dir)
 
     # call tax caculator and get microdata
-    with Client(kernel_id='taxcalc_kernel') as rpc_client:
-        task = rpc_client.submit(endpoint='ogusa_tc_endpoint',
-                                 kwargs=dict(baseline=baseline,
-                                             start_year=beg_yr,
-                                             reform=reform, data=data,
-                                             client=None,
-                                             num_workers=num_workers))
-        result = rpc_client.get(task)
-        print(result)
-        assert result['status'] == 'SUCCESS'
-        micro_data = result['result']
+    with Client(kernel_id='taxcalc') as rpc_client:
+        task = rpc_client.submit_task(endpoint='ogusa_tc_endpoint',
+                                      args=(),
+                                      kwargs=dict(baseline=baseline,
+                                                  start_year=beg_yr,
+                                                  reform=reform, data=data,
+                                                  client=None,
+                                                  num_workers=num_workers))
+        micro_data = task.get()
+        print(micro_data)
 
     lazy_values = []
     for t in years_list:
