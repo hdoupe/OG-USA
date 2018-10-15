@@ -249,7 +249,8 @@ def plot_txfunc_v_data(tx_params, data, params):  # This isn't in use yet
                                    gridpts))
         X_grid, Y_grid = np.meshgrid(X_vec, Y_vec)
         txrate_grid = get_tax_rates(tx_params, X_grid, Y_grid, None,
-                                    tax_func_type, for_estimation=False)
+                                    tax_func_type, rate_type,
+                                    for_estimation=False)
         ax.plot_surface(X_grid, Y_grid, txrate_grid, cmap=cmap1,
                         linewidth=0)
 
@@ -298,7 +299,8 @@ def plot_txfunc_v_data(tx_params, data, params):  # This isn't in use yet
                                    gridpts))
         X_grid, Y_grid = np.meshgrid(X_vec, Y_vec)
         txrate_grid = get_tax_rates(tx_params, X_grid, Y_grid, None,
-                                    tax_func_type, for_estimation=False)
+                                    tax_func_type, rate_type,
+                                    for_estimation=False)
         ax.plot_surface(X_grid, Y_grid, txrate_grid, cmap=cmap1,
                         linewidth=0)
 
@@ -464,7 +466,8 @@ def find_outliers(sse_mat, age_vec, se_mult, start_year, varstr,
     OBJECTS CREATED WITHIN FUNCTION:
     thresh      = [S,BW] array, threshold values for SSE before consider
                    tax function outlier
-    sse_big_mat = [S,BW] array, indicators of weither tax function is outlier
+    sse_big_mat = [S,BW] array, indicators of weither tax function is
+                  outlier
     RETURNS: sse_big_mat
     --------------------------------------------------------------------
     '''
@@ -847,6 +850,9 @@ def txfunc_est(df, s, t, rate_type, tax_func_type, numparams,
                       np.array([X2bar, Xbar, Y2bar, Ybar]))
         params[4:] = np.array([max_x, min_x, max_y, min_y, shift_x, shift_y,
                                shift, share])
+        params_to_plot = np.append(params[:4],
+                                   np.array([max_x, max_y, share, min_x,
+                                             min_y, shift]))
     elif tax_func_type == 'DEP_totalinc':
         '''
         Estimate DeBacker, Evans, Phillips (2018) ratio of polynomial
@@ -879,6 +885,9 @@ def txfunc_est(df, s, t, rate_type, tax_func_type, numparams,
                       np.array([I2bar, Ibar, Y2bar, Ybar]))
         params[4:] = np.array([max_I, min_I, 0.0, 0.0, shift_I, 0.0,
                                shift, 1.0])
+        params_to_plot = np.append(params[:4],
+                                   np.array([max_x, max_y, share, min_x,
+                                             min_y, shift]))
     elif tax_func_type == "GS":
         '''
         Estimate Gouveia-Strauss parameters via least squares.
@@ -898,6 +907,7 @@ def txfunc_est(df, s, t, rate_type, tax_func_type, numparams,
         obs = df.shape[0]
         params = np.zeros(numparams)
         params[:3] = np.array([phi0til, phi1til, phi2til])
+        params_to_plot = params
     elif tax_func_type == "linear":
         '''
         For linear rates, just take the mean ETR or MTR by age-year.
@@ -908,6 +918,7 @@ def txfunc_est(df, s, t, rate_type, tax_func_type, numparams,
         wsse = 0.0
         obs = df.shape[0]
         params[10] = txrates.mean()
+        params_to_plot = params[1:11]
     else:
         raise RuntimeError("Choice of tax function is not in the set of"
                            + " possible tax functions.  Please select"
@@ -955,8 +966,9 @@ def txfunc_est(df, s, t, rate_type, tax_func_type, numparams,
         X_vec = np.exp(np.linspace(np.log(5), np.log(X.max()), gridpts))
         Y_vec = np.exp(np.linspace(np.log(5), np.log(Y.max()), gridpts))
         X_grid, Y_grid = np.meshgrid(X_vec, Y_vec)
-        txrate_grid = get_tax_rates(params, X_grid, Y_grid, None,
-                                    tax_func_type, for_estimation=False)
+        txrate_grid = get_tax_rates(params_to_plot, X_grid, Y_grid, None,
+                                    tax_func_type, rate_type,
+                                    for_estimation=False)
         ax.plot_surface(X_grid, Y_grid, txrate_grid, cmap=cmap1,
                         linewidth=0)
         filename = (tx_label + '_Age_' + str(s) + '_Year_' + str(t) +
@@ -994,8 +1006,9 @@ def txfunc_est(df, s, t, rate_type, tax_func_type, numparams,
         Y_vec = np.exp(np.linspace(np.log(5), np.log(Y_gph.max()),
                                    gridpts))
         X_grid, Y_grid = np.meshgrid(X_vec, Y_vec)
-        txrate_grid = get_tax_rates(params, X_grid, Y_grid, None,
-                                    tax_func_type, for_estimation=False)
+        txrate_grid = get_tax_rates(params_to_plot, X_grid, Y_grid, None,
+                                    tax_func_type, rate_type,
+                                    for_estimation=False)
         ax.plot_surface(X_grid, Y_grid, txrate_grid, cmap=cmap1,
                         linewidth=0)
         filename = (tx_label + 'trunc_Age_' + str(s) + '_Year_' +
@@ -1056,11 +1069,13 @@ def tax_func_loop(t, micro_data, beg_yr, s_min, s_max, age_specific,
     # SE income may be negative
     data_orig['MTR labor income'] = \
         (data_orig['MTR wage income'] * (data_orig['Wage income'] /
-                                  (data_orig['Wage income'].abs() +
-                                   data_orig['SE income'].abs())) +
-         data_orig['MTR SE income'] * (data_orig['SE income'].abs() /
-                                       (data_orig['Wage income'].abs() +
-                                        data_orig['SE income'].abs())))
+                                         (data_orig['Wage income'].abs()
+                                          +
+                                          data_orig['SE income'].abs()))
+         + data_orig['MTR SE income'] * (data_orig['SE income'].abs() /
+                                         (data_orig['Wage income'].abs()
+                                          +
+                                          data_orig['SE income'].abs())))
     data = data_orig[['Age', 'MTR labor income', 'MTR capital income',
                       'Total labor income', 'Total capital income',
                       'Adjusted total income', 'ETR', 'Weights']]
@@ -1760,10 +1775,10 @@ def get_tax_func_estimate(BW, S, starting_age, ending_age,
     if baseline:
         baseline_pckl = (tx_func_est_path or
                          "TxFuncEst_baseline{}.pkl".format(guid))
-        pkl_path = os.path.join(TAX_ESTIMATE_PATH, baseline_pckl)
+        pkl_path = os.path.join(baseline_pckl)
     else:
         policy_pckl = (tx_func_est_path or
                        "TxFuncEst_policy{}.pkl".format(guid))
-        pkl_path = os.path.join(TAX_ESTIMATE_PATH, policy_pckl)
+        pkl_path = os.path.join(policy_pckl)
 
     pickle.dump(dict_params, open(pkl_path, "wb"))
