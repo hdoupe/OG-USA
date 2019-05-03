@@ -1,0 +1,13 @@
+setuptools
+mkl
+scipy>=0.18.1
+matplotlib
+taxcalc>=0.22.1
+numba
+numpy>=1.12.1
+pandas>=0.22.0
+pytest
+pytest-pep8
+pytest-xdist
+dask>=0.20.0
+bokeh

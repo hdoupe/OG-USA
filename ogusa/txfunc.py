@@ -1547,6 +1547,7 @@ def tax_func_estimate(BW, S, starting_age, ending_age,
                                    analytical_mtrs, desc_data,
                                    graph_data, graph_est, output_dir,
                                    numparams, tpers))
+    print("Number workers at taxes: ", num_workers)
     results = compute(*lazy_values, scheduler=dask.multiprocessing.get,
                       num_workers=num_workers)
 

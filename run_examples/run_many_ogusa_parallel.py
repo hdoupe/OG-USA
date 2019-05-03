@@ -8,10 +8,13 @@ import pandas as pd
 
 from ogusa.scripts import postprocess
 from ogusa.scripts.execute import runner
-from ogusa.utils import REFORM_DIR, BASELINE_DIR
+# from ogusa.utils import REFORM_DIR, BASELINE_DIR
 
 CUR_PATH = os.path.abspath(os.path.dirname(__file__))
 PUF_PATH = os.path.join(CUR_PATH, '../ogusa/puf.csv')
+
+REFORM_DIR = "/home/OUTPUT_REFORM"
+BASELINE_DIR = "/home/OUTPUT_BASELINE"
 
 CPU_COUNT = 4
 

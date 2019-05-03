@@ -8,19 +8,22 @@ import numpy as np
 from taxcalc import Calculator
 from ogusa import postprocess
 from ogusa.execute import runner
-from ogusa.utils import REFORM_DIR, BASELINE_DIR
+# from ogusa.utils import REFORM_DIR, BASELINE_DIR
+
+REFORM_DIR = "/home/outputs/OUTPUT_REFORM"
+BASELINE_DIR = "/home/outputs/OUTPUT_BASELINE"
 
 
 def run_micro_macro(user_params):
     # Grab a reform JSON file already in Tax-Calculator
     # In this example the 'reform' is a change to 2017 law (the
     # baseline policy is tax law in 2018)
-    ref = Calculator.read_json_param_objects('2017_law.json', None)
-    reform = ref['policy']
+    # ref = Calculator.read_json_param_objects('2017_law.json', None)
+    reform = {}
 
     # Define parameters to use for multiprocessing
     client = Client(processes=False)
-    num_workers = 1  # multiprocessing.cpu_count()
+    num_workers = 4
     print('Number of workers = ', num_workers)
     start_time = time.time()
 
@@ -87,4 +90,4 @@ def run_micro_macro(user_params):
 
 
 if __name__ == "__main__":
-    run_micro_macro(user_params={})
+    run_micro_macro(user_params={"tau_c": 0.09})
