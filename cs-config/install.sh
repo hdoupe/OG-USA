@@ -1,11 +1,12 @@
 # bash commands for installing your package
 
-git clone https://github.com/PSLmodels/OG-USA
+git clone -b install-tweaks --depth 1 https://github.com/hdoupe/OG-USA
 cd OG-USA
-# make sure the git object is up to date, in case
-# it's cached.
-git fetch origin
-git merge origin/master
+git log -1 # show most recent commit
+# # make sure the git object is up to date, in case
+# # it's cached.
+# git fetch origin
+# git merge origin/cs_params
 
 # Explicitly add channels for looking up dependencies outside of
 # taxcalc and paramtools. If the channels are not specified like this,
