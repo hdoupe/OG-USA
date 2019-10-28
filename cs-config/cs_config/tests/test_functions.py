@@ -1,14 +1,30 @@
+import os
+os.environ["DASK_DISTRIBUTED__WORKER__DAEMON"] = "False"
+
+
+from distributed import Client
+import dask
+import dask.distributed
 from cs_kit import CoreTestFunctions
 from cs_config import functions, helpers
 import pytest
 
+
+def wraps_run_model(meta_param_dict, adjustment):
+    dask.config.refresh()
+    with Client() as c:
+        print("c", c)
+        # TODO: add and handle timeout
+        fut = c.submit(functions.run_model, meta_param_dict, adjustment)
+        print("got fut", fut)
+        return fut.result()
 
 @pytest.mark.full_run
 class TestFunctions1(CoreTestFunctions):
     get_version = functions.get_version
     get_inputs = functions.get_inputs
     validate_inputs = functions.validate_inputs
-    run_model = functions.run_model
+    run_model = wraps_run_model  # functions.run_model
     ok_adjustment = {"OG-USA Parameters": {"frisch": 0.41},
                      "Tax-Calculator Parameters": {}}
     bad_adjustment = {"OG-USA Parameters": {"frisch": 1.5},

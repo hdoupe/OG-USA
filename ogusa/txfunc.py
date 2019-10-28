@@ -15,6 +15,7 @@ import numpy as np
 import scipy.optimize as opt
 from dask import delayed, compute
 import dask.multiprocessing
+from dask.distributed import worker_client
 import pickle
 import matplotlib
 import matplotlib.pyplot as plt
@@ -1380,8 +1381,11 @@ def tax_func_estimate(BW, S, starting_age, ending_age,
                 age_specific, tax_func_type, analytical_mtrs, desc_data,
                 graph_data, graph_est, output_dir, numparams))
     if client:
-        futures = client.compute(lazy_values, num_workers=num_workers)
-        results = client.gather(futures)
+        # C/S launches ogusa as a task--should we use worker_client?
+        # https://distributed.dask.org/en/latest/task-launch.html#connection-with-context-manager
+        with worker_client() as c:
+            futures = c.compute(lazy_values, num_workers=num_workers)
+            results = c.gather(futures)
     else:
         results = results = compute(
             *lazy_values, scheduler=dask.multiprocessing.get,

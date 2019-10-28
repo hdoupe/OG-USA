@@ -4,6 +4,7 @@ import pickle
 import scipy.optimize as opt
 from dask import delayed, compute
 import dask.multiprocessing
+from dask.distributed import worker_client
 from ogusa import tax, utils, household, firm, fiscal
 from ogusa import aggregates as aggr
 import os
@@ -523,9 +524,12 @@ def run_TPI(p, client=None):
                 delayed(inner_loop)(guesses, outer_loop_vars,
                                     initial_values, j, ind, p))
         if client:
-            futures = client.compute(lazy_values,
-                                     num_workers=p.num_workers)
-            results = client.gather(futures)
+            # C/S launches ogusa as a task--should we use worker_client?
+            # https://distributed.dask.org/en/latest/task-launch.html#connection-with-context-manager
+            with worker_client() as c:
+                futures = c.compute(lazy_values,
+                                        num_workers=p.num_workers)
+                results = c.gather(futures)
         else:
             results = results = compute(
                 *lazy_values, scheduler=dask.multiprocessing.get,

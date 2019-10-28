@@ -1,14 +1,18 @@
+import os
+os.environ["DASK_DISTRIBUTED__WORKER__DAEMON"] = "False"
+
+
 import ogusa
 from ogusa.parameters import Specifications
 from ogusa.utils import TC_LAST_YEAR, REFORM_DIR, BASELINE_DIR
 from ogusa import output_plots as op
 from ogusa import SS, utils
-import os
 import io
 import pickle
 import json
 import inspect
 import paramtools
+import dask
 from distributed import Client
 from taxcalc import Policy
 from collections import OrderedDict
@@ -25,6 +29,8 @@ with open(os.path.join(TCDIR, "policy_current_law.json"), "r") as f:
     pcl = json.loads(f.read())
 RES = convert_defaults(pcl)
 
+# ensure dask configuration is fresh.
+dask.config.refresh()
 
 class TCParams(paramtools.Parameters):
     defaults = RES
