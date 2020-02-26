@@ -141,7 +141,7 @@ def run_model(meta_param_dict, adjustment):
     # Dask parmeters
     # Limit to one worker and one thread in hopes of satisfying celery
     # constraints on multiprocessing.
-    client = None #Client(n_workers=1, threads_per_worker=1, processes=False)
+    client = Client(n_workers=1, threads_per_worker=1, processes=False)
     num_workers = 1
 
     # whether to estimate tax functions from microdata
@@ -196,6 +196,11 @@ def run_model(meta_param_dict, adjustment):
 
     comp_dict = comp_output(base_ss, base_params, reform_ss,
                             reform_params)
+
+    # Shut down client and make sure all of its references are
+    # cleaned up.
+    client.close()
+    del client
 
     return comp_dict
 
