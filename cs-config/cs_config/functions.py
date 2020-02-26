@@ -141,7 +141,7 @@ def run_model(meta_param_dict, adjustment):
     # Dask parmeters
     # Limit to one worker and one thread in hopes of satisfying celery
     # constraints on multiprocessing.
-    client = Client(n_workers=1, threads_per_worker=1, processes=False)
+    client = None #Client(n_workers=1, threads_per_worker=1, processes=False)
     num_workers = 1
 
     # whether to estimate tax functions from microdata
