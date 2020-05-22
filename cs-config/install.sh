@@ -1,6 +1,6 @@
 # bash commands for installing your package
 
-git clone -b master --depth 1 https://github.com/PSLmodels/OG-USA
+git clone -b memory --depth 1 https://github.com/rickecon/OG-USA
 cd OG-USA
 
 # Explicitly add channels for looking up dependencies outside of
